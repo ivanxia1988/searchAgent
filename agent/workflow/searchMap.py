@@ -9,14 +9,16 @@ system_prompt="""
 你是一位 Playwright 专家。请根据“招聘搜索需求（自然语言）”和以下 DOM/选择器信息，生成 **一段** 可执行的 Python 代码，且只能输出 **一个** 标注为 `python` 的代码块。代码需定义并实现：
 1. 仅包含 page.click / page.fill / page.wait_for_timeout
 2. 不得包含 import、browser/context/page 初始化、print、try/except、断言等
+3. 所有“不限”的选项，都不需要生成操作代码，因为页面已经模式是不限的
+4. 在开始任何操作前，都要清空筛选项，以防止多轮操作时已经存在选中项目导致干扰。清空方式是点击元素：#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > span
 
 【固定可操作项与选择器】
 1) 直接填充：注意不要将关键词填充到公司名称或岗位名称中，除非显示提到了
-   - 岗位关键词：#rc_select_1
-   - 公司名称：  #rc_select_4
-   - 岗位名称：  #rc_select_2
+   - 能力关键词：  #rc_select_1
+   - 目标公司：  #rc_select_4
+   - 目标岗位：  #rc_select_2
 
-2) 院校要求（点击标签）：
+2) 学历下限（点击标签）：
    - 建议优先：.sfilter-edu .tag-label-group label:has-text("本科/硕士/博士/大专/中专/高中")
    - 兜底（仅当上面匹配不到时才用）：以下长选择器
      2.1 不限：
@@ -35,7 +37,7 @@ system_prompt="""
          #main-container > div:nth-child(2) > div > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > section:nth-child(4) > div > div > div > div.tag-label-group > label:nth-child(7)
 
 3) 工作年限：
-   - 先点击展开（若需要）：.sfilter-work-year .tag-label-group label:nth-child(7)   # 仅用于触发面板
+   - 必须先执行点击：.sfilter-work-year .tag-label-group label:nth-child(7)   # 仅用于触发面板
    - 经验下限（年）：#workYearsLow
    - 经验上限（年）：#workYearsHigh
    - 说明：如 DOM 中实际为标签点击而非输入框，请按标签点击；若存在输入框则按输入框填充
@@ -64,7 +66,7 @@ system_prompt="""
 【工作流程与约束】
 - 从“招聘搜索需求”中提取：岗位关键词、公司名称、岗位名称、院校（可多选）、工作年限上下限、年龄上下限、性别、目前城市、期望城市。未提及的一律不操作。
 - 生成顺序（固定）：关键词 → 岗位名称 → 公司名称 → 院校 → 工作年限（低→高） → 年龄（低→高） → 性别 → 目前城市 → 期望城市。
-- 每次点击或填充后，适当延迟：page.wait_for_timeout(200~400)；涉及展开/联动的操作延迟 400~600。
+- 每次操作，延迟500ms：page.wait_for_timeout(500)；
 - 定位策略：优先“语义类 + 文本”选择器（如 .sfilter-edu .tag-label-group label:has-text('本科')）；不唯一时再加父级限定；最后才使用你提供的长链兜底。
 - 仅使用：page.click / page.fill / page.wait_for_timeout。不得输出任何其他语句或解释性文字。
 - 如果某项在 DOM 中无法定位或需求未提供，对该项**跳过**（不输出任何操作）。
@@ -76,7 +78,7 @@ system_prompt="""
 
 def generateCode(requirement,ExpectCity,CurrentCity):
     response = completion(
-        model="gpt-5",  # 填写需要调用的模型名称
+        model="gpt-4o",  # 填写需要调用的模型名称
         messages=[
             {
                 "role": "system",
@@ -94,6 +96,7 @@ def generateCode(requirement,ExpectCity,CurrentCity):
     pythonCode = re.findall(pattern, response.choices[0].message.content, re.DOTALL)[0]
     #查看代码生成结果
     print(pythonCode)
+
     return pythonCode
 
 #generateCode("我要招聘一名本科毕业的希望在上海工作，责任心很强的35岁的java开发工程师")
