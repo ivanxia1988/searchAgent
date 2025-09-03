@@ -15,6 +15,7 @@ with open("./jdExample/jd_real_1.txt", 'r') as f:
 #coreRequirement = coreRequire(requirement)
 
 requirement = """
+AI方向技术负责人
 1. 计算机相关专业本科及以上学历
 2. 五年以上相关工作经验
 3. 主导过至少2个完整AI项目落地

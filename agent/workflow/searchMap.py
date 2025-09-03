@@ -51,17 +51,12 @@ system_prompt="""
    - 选项（优先）：div.ant-select-dropdown .ant-select-item-option:has-text("不限"|"男性"|"女性")
    - 兜底（仅当上面匹配不到时使用）：body > div:nth-child(27) ... （你提供的那些长链）
 
-6) 目前城市 / 期望城市（从给定 DOM 内按文本点击）：
+6) 目前城市：查找目标城市
    - 仅在各自 DOM 片段中查找对应城市文本（例如 label.tag-item:has-text("上海")）
-   - 允许使用 :has-text()，禁止臆造层级
-   - 目前城市 DOM（仅在此范围内查找并点击）：
-     ```html
-     {CurrentCity}
-     ```
-   - 期望城市 DOM（仅在此范围内查找并点击）：
-     ```html
-     {ExpectCity}
-     ```
+    例如：使用 page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(1)").locator("label.tag-item:has-text('上海')").click()
+7) 期望城市（从给定 DOM 内按文本点击）：
+   - 仅在各自 DOM 片段中查找对应城市文本（例如 label.tag-item:has-text("上海")）
+    例如：使用 page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(2)").locator("label.tag-item:has-text('上海')").click()
 
 【工作流程与约束】
 - 从“招聘搜索需求”中提取：岗位关键词、公司名称、岗位名称、院校（可多选）、工作年限上下限、年龄上下限、性别、目前城市、期望城市。未提及的一律不操作。
@@ -76,17 +71,17 @@ system_prompt="""
 
 """
 
-def generateCode(requirement,ExpectCity,CurrentCity):
+def generateCode(requirement):
     response = completion(
         model="gpt-4o",  # 填写需要调用的模型名称
         messages=[
             {
                 "role": "system",
-                "content": (system_prompt.format(ExpectCity=ExpectCity,CurrentCity=CurrentCity))
+                "content": (system_prompt)
             },
             {
                 "role": "user",
-                "content": f"我要招聘一名人选，岗位要求如下{requirement}"
+                "content": f"人才搜索的关键词如下：{requirement}"
             }
         ],
     )

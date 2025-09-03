@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from playwright.sync_api import Playwright
 from agent.workflow.searchMap import generateCode
 from playwright.sync_api import sync_playwright
-from tool.resumeListExtract import extractResumeList
+from tool.resumeListExtract import extractResumeListWithID
 from agent.workflow.obs import observe
 from tool.logger import save_history_json
 from tool.contextAssemble import assemble_context,assemble_history
@@ -30,9 +30,6 @@ def searchAgent(cookies,requirement):# 初始化工作状态
         page = context.new_page()
         page.goto("https://h.liepin.com/search/getConditionItem")  # 进入后台页面
         print(page.title())
-        # 获得期望城市和当前城市 因为里面的表单选项是动态变动的，所以需要每次都获得并试试生成操作代码
-        ExpectCity = page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(2)").evaluate("el => el.outerHTML")
-        CurrentCity = page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(1)").evaluate("el => el.outerHTML")
 
         history=""
         for step in range(2):
@@ -43,7 +40,7 @@ def searchAgent(cookies,requirement):# 初始化工作状态
             print(llm_response)
 
             # 生成playwright操作代码，获得搜索列表
-            PlaywrightCode = generateCode(llm_response,ExpectCity,CurrentCity)
+            PlaywrightCode = generateCode(llm_response)
             exec(PlaywrightCode, {"page": page})
 
             page.wait_for_timeout(3000)
@@ -53,7 +50,7 @@ def searchAgent(cookies,requirement):# 初始化工作状态
             print(amount)
             # 返回第一页的人选列表
             elements = page.query_selector_all("#resultList > div.table-box > table > tbody > tr")
-            res_list = extractResumeList(elements)
+            res_list = extractResumeListWithID(elements)
             #获得观察结果
             obs=observe(amount,res_list,requirement)
             # 拼接上下文

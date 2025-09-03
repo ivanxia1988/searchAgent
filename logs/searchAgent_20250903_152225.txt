@@ -1,0 +1,254 @@
+[System Prompt]
+
+角色设定
+你是一名资深招聘搜索策略专家，精通用最少关键词实现最大筛选力，并能基于检索反馈快速迭代。
+
+格式要求（严格遵守）
+1. 先输出 <think_summary>（可公开的策略摘要，非逐步推理），再输出 <keywords>。
+2. 两者缺一不可；顺序不可更改；必须使用以下固定模板。
+3. 如无历史反馈，也必须在 <think_summary> 写明“暂无历史搜索反馈，并基于岗位要求给出初始策略”。
+
+固定模板（严格照填）
+-----------------
+<think_summary>
+[用1-5条要点，说明关键词取舍的高层理由；不包含逐步推演。]
+</think_summary>
+<keywords>
+1. 学历下限：[填写]
+2. 年龄要求：[填写]
+3. 工作年限：[填写]
+4. 性别要求：[填写]
+5. 目标公司：[填写]
+6. 目标岗位：[填写]
+7. 能力关键词：[填写]
+8. 目前城市：[填写]
+9. 期望城市：[填写]
+</keywords>
+----------------
+
+生成规范：
+1. think_summary生成需要注意：
+    -如果是首轮搜索，请明确阐述你的计划，包括关键词的选择和筛选策略
+    -如果有历史反馈，请明确关键词的调整逻辑
+    -学历、年龄、城市是硬约束、技能是软约束，可以固定“硬约束”，轮换“软约束” 
+
+2. keywords生成需要注意：
+    -目标公司和目标岗位只在岗位要求中有明确提出时才生成
+    -能力关键词不建议过多，以防止没有那么多匹配项，而且关键词是AND方式，扩展更多关键词反而会让搜索结果更小
+    -不要将非能力关键词的技能词加入能力关键词中，例如将城市加入能力关键词
+    -大部分情况下，每一轮调整都是对能力关键词的调整
+    -能力关键词不要出现有覆盖性的能力，例如tensorflow是包含python能力的
+
+
+稳健性要求
+- 若因任何原因无法输出 <think_summary>，则改用 <strategy>，内容同上。
+- 生成前自检：是否包含且仅包含 <think_summary> 或 <strategy> 之一，以及 <keywords>；顺序正确；无其他多余标签。
+- 如检测失败，立刻重新生成。
+
+示例输入（无历史反馈）：
+【岗位要点】本科及以上；5年以上；主导≥2个AI项目；Python/C++/Java（至少其一）；
+Transformer/CNN；多模态大模型经验；PyTorch/TensorFlow+分布式；B端AI产品；杭州
+
+示例输出：
+<think_summary>
+- 初始检索以“岗位+核心技能+城市”组合起步，控制结果规模。
+- 将“多模态”“Transformer/CNN”放入技能段，避免抽象词。
+- 先用框架关键词单测，再与岗位/城市进行 AND 组合。
+- 无历史反馈，先走收敛策略：从技能→框架→行业，逐步加严。
+</think_summary>
+<keywords>
+1. 学历下限：本科
+2. 年龄要求：不限
+3. 工作年限：5年以上
+4. 性别要求：不限
+4. 目标公司：无
+3. 目标岗位：AI研发总监
+4. 能力关键词：多模态; Transformer; CNN；B端AI产品
+7. 目前城市：杭州
+8. 期望城市：杭州
+</keywords>
+
+
+---
+
+[Task Instruction]
+你的任务是按以下招聘需求，符合要求的人选
+
+AI方向技术负责人
+1. 计算机相关专业本科及以上学历
+2. 五年以上相关工作经验
+3. 主导过至少2个完整AI项目落地
+4. 熟练掌握Python、C++、Java等至少一种编程语言
+5. 精通Transformer、CNN等架构
+6. 有LVM多模态大模型实战经验
+7. 熟悉PyTorch/TensorFlow框架及分布式训练
+8. 具备B端AI产品项目经验
+9. 人选要求在杭州
+
+
+---
+
+[Conversation History]
+
+
+[第1步]
+[思考过程]
+```
+<think_summary>
+- 暂无历史搜索反馈，并基于岗位要求给出初始策略。
+- 采取“岗位+核心技能+城市”组合以控制结果规模，初始步骤地毯式搜索潜在候选人。
+- 能力关键词中选择代表性的关键技能，比如“多模态”“Transformer”“CNN”，而非宽泛描述。
+- 语言技能不分区使用，选择使用“技术栈框架”关键词测试，确保技能吻合。
+- 坚持“硬约束”，确保满足学历、城市等基本要求。
+</think_summary>
+<keywords>
+1. 学历下限：本科
+2. 年龄要求：不限
+3. 工作年限：5年以上
+4. 性别要求：不限
+5. 目标公司：无
+6. 目标岗位：AI方向技术负责人
+7. 能力关键词：多模态; Transformer; CNN; B端AI产品; PyTorch; 分布式
+8. 目前城市：杭州
+9. 期望城市：杭州
+</keywords>
+```
+[执行操作]
+# 清空筛选项
+page.click('#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > span')
+page.wait_for_timeout(500)
+
+# 填充能力关键词
+page.fill('#rc_select_1', '多模态; Transformer; CNN; B端AI产品; PyTorch; 分布式')
+page.wait_for_timeout(500)
+
+# 填充目标岗位
+page.fill('#rc_select_2', 'AI方向技术负责人')
+page.wait_for_timeout(500)
+
+# 学历下限
+page.click('.sfilter-edu .tag-label-group label:has-text("本科")')
+page.wait_for_timeout(500)
+
+# 工作年限下限
+page.click('.sfilter-work-year .tag-label-group label:nth-child(7)')
+page.wait_for_timeout(500)
+page.fill('#workYearsLow', '5')
+page.wait_for_timeout(500)
+
+# 目前城市
+page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(1)").locator("label.tag-item:has-text('杭州')").click()
+page.wait_for_timeout(500)
+
+# 期望城市
+page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(2)").locator("label.tag-item:has-text('杭州')").click()
+page.wait_for_timeout(500)
+[操作结果]
+
+    搜索到的人选总数: 
+    共100位人选
+    首页值得进一步查看的人选数量: 12
+    对首页匹配结果总结: 
+    根据提供的匹配明细，总结和评价如下：
+
+1. **值得进一步查看的人选数量比例**：
+   - 总共有30个匹配结果，其中13个结果为“true”，即有43.3%的候选人被认为职位方向相关，值得进一步查看。
+   - 这一比例显示出在初步筛选中，有接近一半的候选人符合职位方向的基本要求，值得进一步关注。
+
+2. **不符合要求的主要原因**：
+   - 主要不符合的原因包括求职期望与岗位要求不符（如期望职位为产品经理而非技术负责人）、学历专业不符、年龄不符等。
+   - 特别是多次提到的求职期望与岗位要求不符，尤其是产品经理与AI技术负责人方向的冲突，显示出在职位描述或候选人期望方面可能存在较大的差异。
+
+3. **发现的新线索**：
+   - 从不符合的原因中可以看出，许多候选人期望的职位与AI技术负责人方向不一致，尤其是产品经理方向的期望较为突出。这可能提示在招聘过程中需要更明确地界定职位要求，或者在招聘渠道上需要更精准地定位目标候选人。
+   - 年龄和学历专业的要求也多次成为不符合的原因，提示在筛选简历时需要更严格地把控这些硬性条件。
+
+4. **定向去搜寻的目标公司**：
+   - 虽然在提供的匹配明细中没有直接提到具体的公司，但从职位方向相关的候选人中可以进一步分析他们的背景，可能会发现一些在AI技术领域有较强实力的公司，作为定向搜寻的目标。
+
+总体来说，这次匹配结果显示出在初步筛选中有一定比例的候选人符合要求，但也暴露出在职位期望和硬性条件上的一些不匹配问题。未来可以通过更精准的职位描述和定向的招聘策略来提高匹配的准确性。
+
+    
+
+---
+
+
+
+[第2步]
+[思考过程]
+<think_summary>
+- 基于历史搜索反馈，调整策略聚焦在职位期望与实际岗位要求的对齐。
+- 强化“硬约束”部分，以准确过滤学历和城市条件，减少不必要的匹配误差。
+- 由于出现较多不符合的产品经理候选人，将“技术负责人”作为软约束加入能力筛选，以排除无关选择。
+- 调整“能力关键词”，集中在“多模态”“Transformer”与城市特定技能，从而提高职位相关性和匹配精准度。
+</think_summary>
+<keywords>
+1. 学历下限：本科
+2. 年龄要求：不限
+3. 工作年限：5年以上
+4. 性别要求：不限
+5. 目标公司：无
+6. 目标岗位：AI方向技术负责人
+7. 能力关键词：多模态; Transformer; PyTorch; 技术负责人
+8. 目前城市：杭州
+9. 期望城市：杭州
+</keywords>
+[执行操作]
+page.click("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > span")
+page.wait_for_timeout(500)
+
+page.fill("#rc_select_1", "多模态; Transformer; PyTorch; 技术负责人")
+page.wait_for_timeout(500)
+
+page.fill("#rc_select_2", "AI方向技术负责人")
+page.wait_for_timeout(500)
+
+page.click(".sfilter-edu .tag-label-group label:has-text('本科')")
+page.wait_for_timeout(500)
+
+page.click(".sfilter-work-year .tag-label-group label:nth-child(7)")
+page.wait_for_timeout(500)
+
+page.fill("#workYearsLow", "5")
+page.wait_for_timeout(500)
+
+page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(1)").locator("label.tag-item:has-text('杭州')").click()
+page.wait_for_timeout(500)
+
+page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(2)").locator("label.tag-item:has-text('杭州')").click()
+page.wait_for_timeout(500)
+[操作结果]
+
+    搜索到的人选总数: 
+    共41位人选
+    首页值得进一步查看的人选数量: 12
+    对首页匹配结果总结: 
+    根据提供的匹配明细，我们可以对结果进行以下总结和评价：
+
+1. **值得进一步查看的人选数量比例**：
+   - 在30个匹配结果中，有12个结果标记为“true”，表示这些候选人的职位方向相关，值得进一步查看。
+   - 这意味着有40%的候选人符合职位方向要求，比例相对较高，表明匹配的有效性较好。
+
+2. **不符合要求的原因分析**：
+   - 主要不符合的原因包括：
+     - 职位方向不符（如产品经理、交互设计、音视频/图形开发、嵌入式软件开发、全栈和后端开发等与AI技术负责人不一致）。
+     - 求职期望与岗位要求冲突（如期望职位为产品经理或大数据开发工程师）。
+     - 年龄和学历不符（如年龄超过要求或学历低于要求）。
+   - 这些原因表明在筛选过程中需要更加关注候选人的职业方向和求职期望，以提高匹配的精准度。
+
+3. **新的线索和目标公司**：
+   - 从结果中没有明显提到高频出现的公司或特定的目标公司。
+   - 但可以考虑在未来的匹配中，关注那些在AI技术领域有较高知名度或影响力的公司，以提高匹配的相关性。
+
+4. **改进建议**：
+   - 加强对职位描述和候选人简历的关键词匹配，尤其是技术方向和职位期望的匹配。
+   - 在筛选过程中，增加对年龄和学历等硬性条件的过滤，以减少不必要的匹配。
+   - 可以考虑引入更多的行业背景信息，以帮助识别潜在的高价值候选人。
+
+总体而言，这次匹配结果显示出一定的有效性，但仍有改进空间，特别是在提高匹配精准度和识别高潜力候选人方面。
+
+    
+
+---
+
+

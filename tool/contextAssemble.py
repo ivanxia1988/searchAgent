@@ -17,6 +17,7 @@ def assemble_context(system_prompt, task_instruction, history):
         f"{system_prompt}\n"
         "\n---\n\n"
         "[Task Instruction]\n"
+        "你的任务是按以下招聘需求，符合要求的人选\n"
         f"{task_instruction}\n"
         "\n---\n\n"
         "[Conversation History]\n"

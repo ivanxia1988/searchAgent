@@ -1,4 +1,5 @@
-SYSTEM_PROMPT =  """
+[System Prompt]
+
 角色设定
 你是一名资深招聘搜索策略专家，精通用最少关键词实现最大筛选力，并能基于检索反馈快速迭代。
 
@@ -66,4 +67,71 @@ Transformer/CNN；多模态大模型经验；PyTorch/TensorFlow+分布式；B端
 7. 目前城市：杭州
 8. 期望城市：杭州
 </keywords>
-"""
+
+
+---
+
+[Task Instruction]
+你的任务是按以下招聘需求，符合要求的人选
+
+1. 计算机相关专业本科及以上学历
+2. 五年以上相关工作经验
+3. 主导过至少2个完整AI项目落地
+4. 熟练掌握Python、C++、Java等至少一种编程语言
+5. 精通Transformer、CNN等架构
+6. 有LVM多模态大模型实战经验
+7. 熟悉PyTorch/TensorFlow框架及分布式训练
+8. 具备B端AI产品项目经验
+9. 人选要求在杭州
+
+
+---
+
+[Conversation History]
+
+
+[第1步]
+[思考过程]
+<think_summary>
+- 初始策略是基于核心资格和技能要求进行关键词选择，以筛选出合格的候选人。
+- 硬约束包括学历、工作年限和地点要求，这将大大缩小候选人范围。
+- 能力关键词特别关注具体技能和经验，如编程语言和大模型框架，以确保候选人具备技术能力。
+- 因无历史搜索反馈，首先涵盖较为宽泛的“编程语言+模型架构+城市”组合，之后可根据需求增加或替换其他软约束，如具体项目经验或行业背景。
+</think_summary>
+<keywords>
+1. 学历下限：本科
+2. 年龄要求：不限
+3. 工作年限：5年以上
+4. 性别要求：不限
+5. 目标公司：无
+6. 目标岗位：无
+7. 能力关键词：Python; Transformer; CNN; PyTorch; 分布式训练
+8. 目前城市：杭州
+9. 期望城市：杭州
+</keywords>
+[执行操作]
+page.click("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > span")
+page.wait_for_timeout(500)
+
+page.fill("#rc_select_1", "Python; Transformer; CNN; PyTorch; 分布式训练")
+page.wait_for_timeout(500)
+
+page.click(".sfilter-edu .tag-label-group label:has-text('本科')")
+page.wait_for_timeout(500)
+
+page.click(".sfilter-work-year .tag-label-group label:nth-child(7)")
+page.wait_for_timeout(500)
+page.fill("#workYearsLow", "5")
+page.wait_for_timeout(500)
+
+page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(1)").locator("label.tag-item:has-text('杭州')").click()
+page.wait_for_timeout(500)
+
+page.locator("#main-container > div > div.search-resume-wrap-v3 > div:nth-child(2) > div > div > div.wrap > form > section > div > div.filter-box > div:nth-child(2)").locator("label.tag-item:has-text('杭州')").click()
+page.wait_for_timeout(500)
+[操作结果]
+搜索到的人选数量：共21位人选
+
+---
+
+
