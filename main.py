@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 import json
 from tool.cookieTransfer import format_cookie
 from agent.workflow.JDunderstd import coreRequire
-from agent.searchSpace import searchAgent
+from agent.searchSpaceCTS import searchAgent
 
 # 取得可用的有效登陆状态
 with open("cookie.json", 'r') as f:
@@ -15,6 +15,8 @@ with open("./jdExample/jd_real_1.txt", 'r') as f:
 #coreRequirement = coreRequire(requirement)
 
 requirement = """
+我要找到20个符合条件的人选，岗位要求如下：
+
 AI方向技术负责人
 1. 计算机相关专业本科及以上学历
 2. 五年以上相关工作经验
@@ -25,6 +27,7 @@ AI方向技术负责人
 7. 熟悉PyTorch/TensorFlow框架及分布式训练
 8. 具备B端AI产品项目经验
 9. 人选要求在杭州
+
 """
 
-searchAgent(cookies,requirement)
+searchAgent(requirement)

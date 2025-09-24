@@ -1,6 +1,6 @@
 # llm_cts_litellm.py
 import os, uuid, json, requests
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from dotenv import load_dotenv
 from litellm import completion  # pip install litellm
 
@@ -22,20 +22,25 @@ TOOLS = [{
     "type": "function",
     "function": {
         "name": "emit_payload",
-        "description": "把自然语言的<keywords>规则转换为 CTS 搜索接口 payload。只填确定字段；不限/模糊不填。",
+        "description": "把自然语言的规则转换为 CTS 搜索接口 payload。只填确定字段；不限/模糊不填。",
         "parameters": {
             "type": "object",
             "properties": {
-                "keyword": {"type": "string", "description": "能力关键词，例如：Python、Java、前端"},
-                "company": {"type": "string", "description": "目标公司"},
-                "position": {"type": "string", "description": "目标岗位"},
-                "degree": {"type": "integer", "enum": [1,2,3]},
-                "schoolType": {"type": "integer", "enum": [1,2,3,4,5,6]},
-                "workExperienceRange": {"type": "integer", "enum": [1,3,4,5,6]},
-                "gender": {"type": "integer", "enum": [1,2]},
-                "age": {"type": "integer", "enum": [1,2,3,4,5]},
-                "page": {"type": "integer", "default": 1},
-                "pageSize": {"type": "integer", "default": 10}
+                "jd": {"type": "string", "description": "职位描述通过语义去召回结果"},
+                "keyword": {"type": "string", "description": "通用要求关键词"},
+                "school": {"type": "string", "description": "学校名称关键词"},
+                "company": {"type": "string", "description": "公司名称关键词"},
+                "position": {"type": "string", "description": "职位名称关键词"},
+                "workContent": {"type": "string", "description": "工作内容关键词"},
+                "location": {"type": "array", "items": {"type": "string"}, "description": "期望城市城市名称list，示例：['北京','上海市','深圳']"},
+                "degree": {"type": "integer", "enum": [1,2,3], "description": "学历要求枚举值：1. 大专及以上 2. 本科及以上 3. 硕士及以上"},
+                "schoolType": {"type": "integer", "enum": [1,2,3,4,5,6], "description": "学校类型枚举值：1. 双一流 2. 211 3. 985 4. 强基计划 5. 双高计划 6. THE100"},
+                "workExperienceRange": {"type": "integer", "enum": [1,3,4,5,6], "description": "工作年限枚举值：1. 1年以内 3. 1-3年 4. 3-5年 5. 5-10年 6. 10年以上"},
+                "gender": {"type": "integer", "enum": [1,2], "description": "性别枚举值：1. 男 2. 女"},
+                "age": {"type": "integer", "enum": [1,2,3,4,5], "description": "年龄范围枚举值：1. 20-25岁 2. 25-30岁 3. 35-40岁 4. 40-45岁 5. 45岁以上"},
+                "active": {"type": "integer", "enum": [1,2,3,4], "description": "活跃度枚举值：1. 今日活跃 2. 近3天活跃 3. 近15天活跃 4. 近30天活跃"},
+                "page": {"type": "integer", "default": 1, "description": "页数，默认为1"},
+                "pageSize": {"type": "integer", "default": 10, "description": "每页数量，默认为10"}
             },
             "required": ["page","pageSize"],
             "additionalProperties": False
@@ -43,22 +48,29 @@ TOOLS = [{
     }
 }]
 
-SYS_PROMPT = """你是招聘搜索映射器。将<keywords>块里的中文规则转成后端接口允许的 payload 字段。
+SYS_PROMPT = """你是招聘搜索映射器。将输入的中文规则转成后端接口允许的 payload 字段。
 硬性规则：
 - 只有“明确且与枚举匹配”的字段才填写；“不限/无/模糊”不填。
-- 城市（现居/期望等）不能用 location 字段，请并入 keyword。
-- degree：1=大专及以上,2=本科及以上,3=硕士及以上。
-- workExperienceRange：1=<1年,3=1-3,4=3-5,5=5-10,6=10+；“5年以上”默认 5。
-- gender：男=1, 女=2；不限不填。
-- age：1=20-25,2=25-30,3=35-40,4=40-45,5=45+；不在枚举范围不填。
-- 能力/技术词 + 城市 → 合并到 keyword；去重；用空格分隔。
-- 默认 page=1, pageSize=10。
+- jd: 职位描述通过语义去召回结果
+- keyword: 通用要求关键词
+- school: 学校名称关键词
+- company: 公司名称关键词
+- position: 职位名称关键词
+- workContent: 工作内容关键词
+- location: 期望城市城市名称list，示例：["北京","上海市","深圳"]
+- degree：1=大专及以上,2=本科及以上,3=硕士及以上
+- schoolType：1=双一流,2=211,3=985,4=强基计划,5=双高计划,6=THE100
+- workExperienceRange：1=1年以内,3=1-3年,4=3-5年,5=5-10年,6=10年以上；"5年以上"默认 5
+- gender：男=1, 女=2；不限不填
+- age：1=20-25岁,2=25-30岁,3=35-40岁,4=40-45岁,5=45岁以上；不在枚举范围不填
+- active：1=今日活跃,2=近3天活跃,3=近15天活跃,4=近30天活跃
+- 默认 page=1, pageSize=10
 只调用 emit_payload 一次。"""
 
 def llm_to_payload_with_litellm(keywords_block: str, page=1, page_size=10,
                                 model: str = "openai/gpt-4o") -> Dict[str, Any]:
     """
-    用 LiteLLM 的 function calling，把 <keywords> → payload
+    用 LiteLLM 的 function calling，把规则文本 → payload
     model 可换成你代理里映射的任何模型标识
     """
     messages = [
@@ -82,8 +94,8 @@ def llm_to_payload_with_litellm(keywords_block: str, page=1, page_size=10,
     clean = {k: v for k, v in args.items() if v not in (None, "", [])}
     return clean
 
-def search_candidates(env: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-    """调用 CTS 搜索接口"""
+def search_candidates(payload: Dict[str, Any], env: str = "prod") -> Dict[str, Any]:
+    """调用 CTS 搜索接口，默认使用 prod 环境"""
     url = BASE[env] + PATH
     headers = {
         "tenant_key": TENANT_KEY,
@@ -98,19 +110,46 @@ def search_candidates(env: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         raise RuntimeError(f"API错误: {data}")
     return data
 
+def search_with_payload_and_result(keywords_block: str, page=1, page_size=10,
+                                   model: str = "openai/gpt-4o", env: str = "prod") -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """
+    封装完整的搜索流程，同时返回 payload 和搜索结果
+    
+    Args:
+        keywords_block: 包含搜索规则的文本
+        page: 页码，默认为1
+        page_size: 每页数量，默认为10
+        model: 使用的 LLM 模型，默认为 "openai/gpt-4o"
+        env: 环境，默认为 "prod"
+    
+    Returns:
+        一个元组，包含 (payload, 搜索结果)
+    """
+    # 生成 payload
+    payload = llm_to_payload_with_litellm(keywords_block, page, page_size, model)
+    # 调用搜索接口并获取结果
+    result = search_candidates(payload, env)
+    # 返回 payload 和结果
+    return payload, result
+
 if __name__ == "__main__":
     kblock = """<keywords>
-1. 学历下限：本科
-2. 年龄要求：不限
-3. 工作年限：5年以上
-4. 性别要求：不限
-5. 目标公司：无
-6. 目标岗位：技术负责人
-7. 能力关键词：Python
-8. 目前城市：杭州
-9. 期望城市：杭州
+2. 学历下限：本科
+3. 年龄要求：不限
+4. 工作年限：5年以上
+5. 性别要求：不限
+6. 期望城市：杭州市
+7. 能力关键词：多模态; Transformer
+8. 公司关键词：无
 </keywords>"""
     payload = llm_to_payload_with_litellm(kblock, page=1, page_size=10)
     print("LLM 映射 payload =>", json.dumps(payload, ensure_ascii=False))
-    res = search_candidates(env="test", payload=payload)
+    res = search_candidates(payload)  # 默认使用 prod 环境
     print(json.dumps(res, ensure_ascii=False)[:1200])
+    
+    # 使用新的封装函数示例
+    print("\n使用封装函数:")
+    payload, result = search_with_payload_and_result(kblock)
+    print("封装函数返回的 payload =>", json.dumps(payload, ensure_ascii=False))
+    print("封装函数返回的结果 =>", json.dumps(result, ensure_ascii=False)[:1200])
+
