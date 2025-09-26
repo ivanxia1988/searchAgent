@@ -25,7 +25,6 @@ AI方向技术负责人
 5. 精通Transformer、CNN等架构
 6. 有LVM多模态大模型实战经验
 7. 熟悉PyTorch/TensorFlow框架及分布式训练
-8. 具备B端AI产品项目经验
 9. 人选要求在杭州
 
 """

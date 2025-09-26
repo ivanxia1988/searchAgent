@@ -35,7 +35,7 @@ def searchAgent(cookies,requirement):# 初始化工作状态
 
         history=""
         reAct=""
-        for step in range(10):
+        for step in range(2):
             # 组装当前轮次的上下文
             context = assemble_context(system_prompt, requirement, reAct)
             print(f"\n=== Step {step + 1} ===")

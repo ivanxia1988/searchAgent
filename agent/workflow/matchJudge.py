@@ -59,22 +59,37 @@ prompt_for_precise="""
 输入：
 1. 岗位要求（包含硬性条件和加分条件）
 2. 候选人简历内容（完整文本）
+3. 搜索策略（包含关键词等）
+
 
 任务：
 - 逐条对比岗位要求和简历内容。
 - 只依据简历中明确体现的信息，不做臆测或补充。
 - 硬性条件（如学历、年限、技能、城市等）必须完全满足。
-- 加分条件（如特定项目经验、行业背景等）如未体现，不影响“true”的判断，但不可视为满足。
 - 任何缺失、模糊或无法确认的硬性条件，都判定为“不符合”。
 - 输出必须是严格 JSON，格式如下：
    {
        "result": "true",
-       "reason": "不满足的原因"
+       "reason": "不满足的原因",
+       "root_cause": "失败是否是搜索关键词有关系",
+       "clue": "通过阅读简历，发现新的挖掘方向"
    }
 
 注意：
 - 禁止输出解释或理由，只能输出 `true` 或 `false`。
 - 判断必须完全基于简历中出现的明确信息，不能主观推断。
+
+root_cause：
+例如 搜索关键词是python，但是岗位要求是AI方向，python的关键词并不能有效检索到AI方向的人才
+
+clue：
+学习可扩展的关键词，提升召回能力：
+技能词扩展：从检索到符合条件的简历中的，与当前检索条件对应的子集（要求B端项目，发现简历中很多提到了CRM系统等）
+岗位词扩展：从检索到符合条件的简历中的岗位自称，去思考拓展思路（JD 叫“AI方向技术负责人”，简历可能自称“算法总监”或“CTO助理”，总经理助理，可能简历是行长助理）
+
+学习人选聚集特征，提升精准定位能力：
+公司特征：从检索到符合条件的简历中，发现杭州的视觉AI人才很多都来自海康威视，那么海康是一个好公司
+行业特征：从检索到符合条件的简历中，发现机器人行业会用到视觉方向，那么这类行业会有很多人才聚集
 
 
 """
@@ -186,7 +201,7 @@ def matchJudgeBatch(res_list,requirement,llm_response, page=None):
     summary=response.choices[0].message.content
     return short_list,summary
 
-def matchJudgePrecise(res,requirement):
+def matchJudgePrecise(res,requirement,policy):
     response = completion(
         model="gpt-4o",  # 填写需要调用的模型名称
         messages=[
@@ -196,7 +211,7 @@ def matchJudgePrecise(res,requirement):
             },
             {
                 "role": "user",
-                "content": f"这是招聘要求：{requirement}\n这是简历内容：{res}"
+                "content": f"这是使用的搜索策略：{policy}\n这是招聘要求：{requirement}\n这是简历内容：{res}"
             }
         ],
         top_p=0.7,

@@ -138,8 +138,8 @@ if __name__ == "__main__":
 3. 年龄要求：不限
 4. 工作年限：5年以上
 5. 性别要求：不限
-6. 期望城市：杭州市
-7. 能力关键词：多模态; Transformer
+6. 期望城市：杭州
+7. 能力关键词：无
 8. 公司关键词：无
 </keywords>"""
     payload = llm_to_payload_with_litellm(kblock, page=1, page_size=10)
