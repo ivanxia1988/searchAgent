@@ -29,12 +29,22 @@ def searchAgent(requirement):# 初始化工作状态
 
         progress=0
         step = 0
+        messages=[]
+        messages.append({ "role": "system", "content": SYSTEM_PROMPT}) 
+        messages.append({ "role": "user", "content": requirement}) 
+
         while step < 3 and progress <= 1:
             # 组装当前轮次的上下文
-            context = assemble_context(SYSTEM_PROMPT, requirement,progress, history)
             print(f"\n=== Step {step + 1} ===")
-            llm_response = call_llm(context)
+
+            response = completion(
+                model="gpt-4o",
+                messages=messages
+            )
+            add_tokens(response['usage']['total_tokens'])
+            llm_response = response["choices"][0]["message"]["content"]
             print(llm_response)
+            messages.append({ "role": "assistant", "content": llm_response}) 
             # 调用CTS查询工具得到结果
             payload, search_result = search_with_payload_and_result(llm_response)
 
@@ -43,10 +53,14 @@ def searchAgent(requirement):# 初始化工作状态
             task_finished = len(get_qualified_candidate())
             #记录任务完成进度 0/20
             progress=task_finished/20
-            step+=1
 
             # 拼接上下文
-            history = history + "\n\n" + assemble_history(step+1, llm_response, "通过API完成检索，payload如下："+json.dumps(payload, ensure_ascii=False), obs)
+            newHistory = assemble_history(step+1, llm_response, "通过API完成检索，payload如下："+json.dumps(payload, ensure_ascii=False), obs)
+            history = history + "\n\n" + newHistory
+            step += 1
+            messages.append({ "role": "user", "content": newHistory}) 
+            messages.append({ "role": "user", "content": f"目前任务完成进展为：{progress}"}) 
+            print(messages)
         
         # 循环结束后，组装包含所有轮次信息的最终上下文
         final_context = assemble_context(SYSTEM_PROMPT, requirement, progress, history)
@@ -59,6 +73,7 @@ def searchAgent(requirement):# 初始化工作状态
         print(f"最终结果：\n所用步数：{step}\n合格人选数量：{task_finished}\ntoken数量：{total_tokens}\n费用（假设每百万token费用2.5美元）：{total_tokens /10000 * 0.025:.4f}美元")
         
         #对final context进行评级
+
         response = completion(
                 model="gpt-4o",
                 messages=[

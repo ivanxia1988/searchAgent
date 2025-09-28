@@ -134,21 +134,18 @@ def search_with_payload_and_result(keywords_block: str, page=1, page_size=10,
 
 if __name__ == "__main__":
     kblock = """<keywords>
-3. 年龄要求：不限
-5. 性别要求：不限
+3. 年龄要求：40
+5. 性别要求：男
 6. 期望城市：杭州
 工作经验：5年以上
-7. 能力关键词：python
+7. 能力关键词：python，tensorflow
 8. 公司关键词：无
 </keywords>"""
-    payload = llm_to_payload_with_litellm(kblock, page=1, page_size=10)
-    print("LLM 映射 payload =>", json.dumps(payload, ensure_ascii=False))
-    res = search_candidates(payload)  # 默认使用 prod 环境
-    print(json.dumps(res, ensure_ascii=False)[:1200])
-    
     # 使用新的封装函数示例
     print("\n使用封装函数:")
     payload, result = search_with_payload_and_result(kblock)
     print("封装函数返回的 payload =>", json.dumps(payload, ensure_ascii=False))
     print("封装函数返回的结果 =>", json.dumps(result, ensure_ascii=False)[:1200])
+    print("封装函数返回的结果 =>", result.get("data").get("total"))
+    print("封装函数返回的结果 =>", len(result.get("data").get("candidates")))
 

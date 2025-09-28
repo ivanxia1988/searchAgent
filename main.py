@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 import json
 from tool.cookieTransfer import format_cookie
 from agent.workflow.JDunderstd import coreRequire
-from agent.searchSpaceCTS import searchAgent
+from agent.searchSpaceCTSNew import searchAgent
 
 # 取得可用的有效登陆状态
 with open("cookie.json", 'r') as f:
@@ -37,4 +37,4 @@ requirement1 = """
 
 """
 
-searchAgent(requirement1)
+searchAgent(requirement)

@@ -1,5 +1,4 @@
-from pydoc import plain
-from agent.workflow.matchJudge import matchJudgeBatch, matchJudgePrecise
+from agent.workflow.matchJudge import matchJudgePrecise
 from dotenv import load_dotenv
 from agent.prompt.summary import PROMPT_FOR_SUMMARY
 import json
@@ -8,21 +7,8 @@ from tool.candidateParser import parse_candidates_to_text
 from tool.matchCache import save_qualified_candidate,save_match_result_jd2cv,get_match_result_jd2cv,save_search_result,get_search_result
 from tool.token_counter import add_tokens
 import re
+import time
 load_dotenv()
-
-def observe(amount, res_list, requirement, llm_response, page=None):
-    short_list, summary = matchJudgeBatch(res_list, requirement, llm_response, page)
-
-    obs = f"""
-    搜索到的人选总数: {amount}
-    首页人选数量：{len(res_list)}
-    首页完美人选数量: {len(short_list)}
-    对首页匹配结果总结: 
-    {summary}
-
-    """
-
-    return obs
 
 def observe_cts(step,response, requirement, policy):
     """
@@ -61,8 +47,6 @@ def observe_cts(step,response, requirement, policy):
         candidates = data.get('candidates', [])
         page = data.get('page', 1)
         page_size = data.get('pageSize', 10)
-
-        print(f"total: {total}")
         
         list=[]
         # 如果有职位要求和候选人数据，可以添加更多分析
@@ -70,6 +54,7 @@ def observe_cts(step,response, requirement, policy):
             # 使用工具模块中的方法将候选人从JSON格式转为优化后的文本格式
             candidates_with_id_and_text_only = parse_candidates_to_text(candidates)
             rep_candidate_num=0
+            qualified_candidate_num=0
             for candidate in candidates_with_id_and_text_only:
                 cv_id = candidate['cv_id']
                 text = candidate['candidate_text']
@@ -81,6 +66,8 @@ def observe_cts(step,response, requirement, policy):
                 else:
                     # 缓存中没有结果，执行匹配并保存结果
                     result = matchJudgePrecise(text, requirement,policy)
+                    # 并发控制以防超出openai的api调用的rate limit
+                    time.sleep(0.5)
                     print(f"result: {result}")
                     list.append(result)
                     #在jd2cv中缓存新结果
@@ -88,25 +75,26 @@ def observe_cts(step,response, requirement, policy):
                     #在qualified candidate中缓存合格人选详情
                     if result.get("result") == "true":
                         save_qualified_candidate(text)
+                        qualified_candidate_num
 
         #重复率
         review_num=len(candidates)
         rep_rate = rep_candidate_num / review_num if review_num != 0 else 0
         # 构建观察字符串，如果没有候选人，不展示重复与合格相关信息
+
         obs = f"""
-        搜索到的人选总数: {total}
-        当前页码: {page}
-        每页数量: {page_size}
-        本页候选人数量: {review_num}
+        搜索到的人选总数: {total}，其中对第一页候选人进行合格检查，数量为: {review_num}
         """
         if candidates:
             obs += f"""
         重复出现的人选数量: {rep_candidate_num}
         重复出现的人选占比: {rep_rate}
-        合格人选数量：{len(list)}
-        合格人选命中率：{len(list)/review_num if review_num != 0 else 0}
+        合格人选数量：{qualified_candidate_num}
+        合格人选命中率（1即为100%）：{qualified_candidate_num/review_num if review_num != 0 else 0}
         """
         
+        print(obs)
+
         # 使用litellm调用OpenAI API对obs进行分析
         temp=obs+"\n"+f"人选情况: {list}"
 
