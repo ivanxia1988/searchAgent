@@ -18,7 +18,6 @@ requirement = """
 我要找到20个符合条件的人选，岗位要求如下：
 
 AI方向技术负责人
-1. 计算机相关专业本科及以上学历
 2. 五年以上相关工作经验
 3. 主导过至少2个完整AI项目落地
 4. 熟练掌握Python、C++、Java等至少一种编程语言
@@ -29,4 +28,13 @@ AI方向技术负责人
 
 """
 
-searchAgent(requirement)
+requirement1 = """
+我要找到20个符合条件的人选，岗位要求如下：
+
+2. 五年以上相关工作经验
+7. 熟悉PyTorch/TensorFlow框架及分布式训练
+9. 人选要求在杭州
+
+"""
+
+searchAgent(requirement1)

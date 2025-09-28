@@ -1,1 +1,107 @@
-[]
+[
+  {
+    "cv_id": "580bbfa3f646bb362f854a552ec6ce58",
+    "result": "false",
+    "reason": "候选人简历中未明确提及熟悉PyTorch/TensorFlow框架及分布式训练的经验",
+    "root_cause": "搜索策略中虽然锁定了城市和工作年限，但未能有效筛选出具备特定技术框架经验的候选人",
+    "clue": "建议在搜索策略中增加对PyTorch和TensorFlow的具体项目经验关键词，可能会提高匹配度"
+  },
+  {
+    "cv_id": "5730b63ab9f872e855b586c943d2f408",
+    "result": "false",
+    "reason": "简历中未明确提及候选人熟悉PyTorch/TensorFlow框架及分布式训练的经验",
+    "root_cause": "搜索策略中虽然锁定了城市和工作年限，但未能有效识别出候选人是否具备特定技术框架的经验",
+    "clue": "建议在搜索策略中增加对具体技术框架的详细描述，如在简历中明确提及的项目或技术关键词，以提高匹配准确性"
+  },
+  {
+    "cv_id": "971c6d6953bfdff8e9e0b5720aa617be",
+    "result": "true",
+    "reason": "候选人满足所有硬性条件：6年以上工作经验，熟悉PyTorch/TensorFlow框架和分布式训练，当前在杭州",
+    "root_cause": "搜索策略中的核心关键词（PyTorch、TensorFlow、分布式训练、杭州）有效识别了符合条件的候选人",
+    "clue": "可考虑增加相关技术关键词如Keras、MXNet等，以及目标公司如阿里巴巴、网易等杭州本地科技企业"
+  },
+  {
+    "cv_id": "c8cf5c935b6e3e21f13a7701cf5ce8b0",
+    "result": "true",
+    "reason": "候选人满足所有硬性条件：8年以上工作经验，熟悉PyTorch/TensorFlow框架和分布式训练，期望城市为杭州",
+    "root_cause": "搜索策略中的核心关键词（PyTorch、TensorFlow、分布式训练、杭州）有效识别了符合条件的候选人",
+    "clue": "可考虑增加相关技术关键词如Keras、MXNet等，以及目标公司如阿里巴巴、网易等杭州本地科技企业"
+  },
+  {
+    "cv_id": "bc4559768b09565954b20d2485918ed2",
+    "result": "false",
+    "reason": "候选人当前所在地为武汉市，不符合岗位要求的杭州城市要求",
+    "root_cause": "搜索策略中城市是硬性约束，但简历中显示当前所在地不符合要求",
+    "clue": "考虑在搜索策略中增加对期望城市的权重，可能会找到更多符合条件的候选人"
+  },
+  {
+    "cv_id": "722c1083077e761d8d100dfe84878d9c",
+    "result": "true",
+    "reason": "候选人满足所有硬性条件：6年以上工作经验，熟悉PyTorch框架和分布式训练，期望城市为杭州",
+    "root_cause": "搜索策略中的核心关键词（PyTorch、分布式训练、杭州）有效识别了符合条件的候选人",
+    "clue": "可考虑增加相关技术关键词如TensorFlow、Keras等，以及目标公司如阿里巴巴、网易等杭州本地科技企业"
+  },
+  {
+    "cv_id": "8b0380d35e04f0798e23549cec315bef",
+    "result": "true",
+    "reason": "候选人满足所有硬性条件：7年以上工作经验，熟悉PyTorch/TensorFlow框架和分布式训练，期望城市为杭州",
+    "root_cause": "搜索策略中的核心关键词（PyTorch、TensorFlow、分布式训练、杭州）有效识别了符合条件的候选人",
+    "clue": "可考虑增加相关技术关键词如Keras、MXNet等，以及目标公司如阿里巴巴、网易等杭州本地科技企业"
+  },
+  {
+    "cv_id": "61e0d7ffee6dceec6bec9528125c54e2",
+    "result": "true",
+    "reason": "候选人满足所有硬性条件：5年以上工作经验，熟悉PyTorch框架和分布式训练，期望城市为杭州",
+    "root_cause": "搜索策略中的核心关键词（PyTorch、TensorFlow、分布式训练、杭州）有效识别了符合条件的候选人",
+    "clue": "可考虑增加相关技术关键词如Keras、MXNet等，以及目标公司如阿里巴巴、网易等杭州本地科技企业"
+  },
+  {
+    "cv_id": "c6cbf1e074f6eaa297d4c4c0b97a4f1e",
+    "result": "true",
+    "reason": "候选人满足所有硬性条件：7年以上工作经验，熟悉PyTorch/TensorFlow框架和分布式训练，当前在杭州",
+    "root_cause": "搜索策略中的核心关键词（PyTorch、TensorFlow、分布式训练、杭州）有效识别了符合条件的候选人",
+    "clue": "可考虑增加相关技术关键词如Keras、MXNet等，以及目标公司如阿里巴巴、网易等杭州本地科技企业"
+  },
+  {
+    "cv_id": "699330b976b34dec61336d0be303adad",
+    "result": "false",
+    "reason": "候选人当前所在地为西安市，不符合岗位要求的杭州城市要求",
+    "root_cause": "搜索策略中城市是硬性约束，但简历中显示当前所在地不符合要求",
+    "clue": "考虑在搜索策略中增加对期望城市的权重，可能会找到更多符合条件的候选人"
+  },
+  {
+    "cv_id": "6857eb2ae15324739d8bf56e5507e222",
+    "result": "false",
+    "reason": "候选人简历中未明确提及熟悉PyTorch/TensorFlow框架及分布式训练，无法确认满足该硬性条件",
+    "root_cause": "搜索策略中核心关键词（PyTorch、TensorFlow）未能在简历中找到对应信息，可能需要更明确的技能描述",
+    "clue": "建议在搜索策略中增加对具体项目中使用的框架和技术的描述，以提高匹配度；同时考虑增加对分布式训练的具体应用场景的关键词"
+  },
+  {
+    "cv_id": "ac3d41bc11710f1e45b9a395597e5504",
+    "result": "false",
+    "reason": "候选人简历中未明确提及熟悉PyTorch/TensorFlow框架及分布式训练的经验，无法确认满足岗位要求的核心技能条件。",
+    "root_cause": "搜索策略中虽然简化了关键词，但未能有效识别出具备PyTorch/TensorFlow技能的候选人。",
+    "clue": "建议在搜索策略中增加对自然语言处理、算法工程师等相关职位的关注，可能会找到具备所需技能的候选人。同时，考虑增加对简历中具体项目经验的关键词匹配，如分布式训练、深度学习框架等。"
+  },
+  {
+    "cv_id": "66eeedc8bf0db3d52973e7a589ecb37c",
+    "result": "true",
+    "reason": "候选人满足所有硬性条件：6年以上工作经验，熟悉PyTorch/TensorFlow框架和分布式训练，当前在杭州",
+    "root_cause": "搜索策略中的核心关键词（PyTorch、TensorFlow、分布式训练、杭州）有效识别了符合条件的候选人",
+    "clue": "可考虑增加相关技术关键词如模型压缩、量化等，以及目标公司如阿里巴巴、vivo等杭州本地科技企业"
+  },
+  {
+    "cv_id": "1405c7de80e7451ca7538ab19fcac7f2",
+    "result": "false",
+    "reason": "候选人简历中未提及熟悉PyTorch/TensorFlow框架及分布式训练的经验，不符合岗位要求的核心技能条件",
+    "root_cause": "搜索策略中虽然简化了关键词，但未能有效识别出具备PyTorch/TensorFlow技能的候选人",
+    "clue": "建议在搜索策略中增加对具体技术栈的细化描述，如明确要求候选人具备PyTorch/TensorFlow的项目经验或相关证书"
+  },
+  {
+    "cv_id": "6aade122edc2e53cbecffba3a510bbea",
+    "result": "false",
+    "reason": "候选人简历中未明确提到熟悉PyTorch/TensorFlow框架及分布式训练的经验",
+    "root_cause": "搜索策略中核心关键词（PyTorch、TensorFlow）未能在简历中找到对应的明确信息，导致无法确认候选人是否符合要求",
+    "clue": "建议在搜索策略中增加对分布式训练经验的具体描述，或者增加其他相关技术关键词如大模型、深度学习框架等，以提高匹配度"
+  }
+]

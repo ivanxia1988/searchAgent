@@ -16,6 +16,9 @@ def parse_candidates_to_text(candidates):
     
     # 遍历每个候选人
     for candidate in candidates:
+        # 初始化候选人文本变量
+        candidate_text = ""
+        
         personal_info = [
             f"性别: {candidate.get('gender', '')}",
             f"年龄: {candidate.get('age', '')}",

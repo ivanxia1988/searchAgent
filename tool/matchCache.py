@@ -1,4 +1,5 @@
 # 人岗匹配结果缓存管理工具
+from operator import truediv
 import os
 import json
 import hashlib
@@ -32,6 +33,11 @@ def save_qualified_candidate(candidate):
     _save_cache(cache, QULIFIED_CANDIDATE_FILE)
     print(f"✅ 符合条件的候选人已保存到缓存")
 
+
+def get_qualified_candidate():
+    """保存符合条件的候选人到缓存"""
+    cache = _load_cache(QULIFIED_CANDIDATE_FILE)
+    return cache
 
 
 def save_match_result_jd2cv(cv_id, match_result):
@@ -117,6 +123,20 @@ def save_search_result(step, policy, obs):
     
     cache.append(new_record)
     _save_cache(cache, SEARCH_CACHE_FILE)
+
+
+def get_search_result(keyword):
+    """
+    从缓存中获取搜索结果
+    """
+    cache = _load_cache(SEARCH_CACHE_FILE)
+    
+    for record in cache:
+        if record.get('keyword') == keyword:
+            print(f"✅ 从keyword_record.json获取到搜索结果,step={record.get('step')}")
+            return True
+    
+    return False
 
 def clear_cache():
     """清除所有缓存文件"""

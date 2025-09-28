@@ -134,12 +134,11 @@ def search_with_payload_and_result(keywords_block: str, page=1, page_size=10,
 
 if __name__ == "__main__":
     kblock = """<keywords>
-2. 学历下限：本科
 3. 年龄要求：不限
-4. 工作年限：5年以上
 5. 性别要求：不限
 6. 期望城市：杭州
-7. 能力关键词：无
+工作经验：5年以上
+7. 能力关键词：python
 8. 公司关键词：无
 </keywords>"""
     payload = llm_to_payload_with_litellm(kblock, page=1, page_size=10)
