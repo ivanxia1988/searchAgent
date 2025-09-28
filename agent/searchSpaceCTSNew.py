@@ -9,6 +9,8 @@ from agent.prompt.system import SYSTEM_PROMPT
 from tool.searchCTS import search_with_payload_and_result
 from tool.matchCache import clear_cache,get_qualified_candidate
 from tool.token_counter import add_tokens, get_total_tokens, reset_tokens
+from agent.prompt.evaluate import PROMPT_FOR_EVAlUATE
+
 import json
 
 load_dotenv()
@@ -28,14 +30,14 @@ def searchAgent(requirement):# 初始化工作状态
         reset_tokens()
 
         progress=0
-        step = 0
+        step = 1
         messages=[]
         messages.append({ "role": "system", "content": SYSTEM_PROMPT}) 
         messages.append({ "role": "user", "content": requirement}) 
 
-        while step < 3 and progress <= 1:
+        while step <= 3 and progress <= 1:
             # 组装当前轮次的上下文
-            print(f"\n=== Step {step + 1} ===")
+            print(f"\n=== Step {step} ===")
 
             response = completion(
                 model="gpt-4o",
@@ -55,12 +57,12 @@ def searchAgent(requirement):# 初始化工作状态
             progress=task_finished/20
 
             # 拼接上下文
-            newHistory = assemble_history(step+1, llm_response, "通过API完成检索，payload如下："+json.dumps(payload, ensure_ascii=False), obs)
+            newHistory = assemble_history(step, llm_response, "通过API完成检索，payload如下："+json.dumps(payload, ensure_ascii=False), obs)
             history = history + "\n\n" + newHistory
             step += 1
             messages.append({ "role": "user", "content": newHistory}) 
             messages.append({ "role": "user", "content": f"目前任务完成进展为：{progress}"}) 
-            print(messages)
+
         
         # 循环结束后，组装包含所有轮次信息的最终上下文
         final_context = assemble_context(SYSTEM_PROMPT, requirement, progress, history)
@@ -70,14 +72,14 @@ def searchAgent(requirement):# 初始化工作状态
         total_tokens = get_total_tokens()
 
         # 打印最终成果：所用步数、合格人选数量、总token数量、费用（假设每百万token费用2.5美元）
-        print(f"最终结果：\n所用步数：{step}\n合格人选数量：{task_finished}\ntoken数量：{total_tokens}\n费用（假设每百万token费用2.5美元）：{total_tokens /10000 * 0.025:.4f}美元")
+        print(f"最终结果：\n所用步数：{step-1}\n合格人选数量：{task_finished}\ntoken数量：{total_tokens}\n费用（假设每百万token费用2.5美元）：{total_tokens /10000 * 0.025:.4f}美元")
         
         #对final context进行评级
 
         response = completion(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "请根据以下Agent的执行轨迹，评价他的执行效果"},
+                    {"role": "system", "content": PROMPT_FOR_EVAlUATE},
                     {"role": "user", "content": final_context}
                 ]
             )

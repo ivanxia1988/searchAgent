@@ -3,7 +3,7 @@ from playwright.sync_api import sync_playwright
 import json
 from tool.cookieTransfer import format_cookie
 from agent.workflow.JDunderstd import coreRequire
-from agent.searchSpaceCTSNew import searchAgent
+from agent.searchSpaceCTS import searchAgent
 
 # 取得可用的有效登陆状态
 with open("cookie.json", 'r') as f:
@@ -18,6 +18,7 @@ requirement = """
 我要找到20个符合条件的人选，岗位要求如下：
 
 AI方向技术负责人
+1. 本科以上学历
 2. 五年以上相关工作经验
 3. 主导过至少2个完整AI项目落地
 4. 熟练掌握Python、C++、Java等至少一种编程语言
