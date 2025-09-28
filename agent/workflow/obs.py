@@ -4,7 +4,7 @@ from agent.prompt.summary import PROMPT_FOR_SUMMARY
 import json
 from litellm import completion
 from tool.candidateParser import parse_candidates_to_text
-from tool.matchCache import save_qualified_candidate,save_match_result_jd2cv,get_match_result_jd2cv,save_search_result,get_search_result
+from tool.matchCache import save_long_term_policy, save_qualified_candidate,save_match_result_jd2cv,get_match_result_jd2cv,save_search_result,get_search_result
 from tool.token_counter import add_tokens
 import re
 import time
@@ -45,9 +45,7 @@ def observe_cts(step,response, requirement, policy):
         data = response_dict.get('data', {})
         total = data.get('total', 0)
         candidates = data.get('candidates', [])
-        page = data.get('page', 1)
-        page_size = data.get('pageSize', 10)
-        
+
         list=[]
         # 如果有职位要求和候选人数据，可以添加更多分析
         if candidates:
@@ -75,25 +73,29 @@ def observe_cts(step,response, requirement, policy):
                     #在qualified candidate中缓存合格人选详情
                     if result.get("result") == "true":
                         save_qualified_candidate(text)
-                        qualified_candidate_num
+                        qualified_candidate_num+=1
 
         #重复率
         review_num=len(candidates)
         rep_rate = rep_candidate_num / review_num if review_num != 0 else 0
+
         # 构建观察字符串，如果没有候选人，不展示重复与合格相关信息
 
         obs = f"""
         搜索到的人选总数: {total}，其中对第一页候选人进行合格检查，数量为: {review_num}
         """
         if candidates:
+            qualified_candidate_rate=qualified_candidate_num/review_num if review_num != 0 else 0
             obs += f"""
-        重复出现的人选数量: {rep_candidate_num}
-        重复出现的人选占比: {rep_rate}
-        合格人选数量：{qualified_candidate_num}
-        合格人选命中率（1即为100%）：{qualified_candidate_num/review_num if review_num != 0 else 0}
-        """
-        
+                重复出现的人选数量: {rep_candidate_num}
+                重复出现的人选占比: {rep_rate}
+                合格人选数量：{qualified_candidate_num}
+                合格人选命中率（1即为100%）：{qualified_candidate_rate}
+                """
+            if qualified_candidate_rate >= 0.3:
+                save_long_term_policy(requirement,keywords)
         print(obs)
+
 
         # 使用litellm调用OpenAI API对obs进行分析
         temp=obs+"\n"+f"人选情况: {list}"

@@ -9,6 +9,8 @@ from tool.candidateParser import generate_candidate_id
 JD2CV_CACHE_FILE = "agent/memory/jd2cv_cache.json"
 QULIFIED_CANDIDATE_FILE = "agent/memory/qulified_candidate.json"
 SEARCH_CACHE_FILE = "agent/memory/keyword_record.json"
+LONG_TERM_POLICY_FILE = "agent/memory/long_term_policy.json"
+
 
 
 def _load_cache(file_path):
@@ -24,6 +26,29 @@ def _save_cache(data, file_path):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def save_long_term_policy(requirement, policy):
+    """保存长期策略到缓存"""
+    hashkey = hashlib.md5(requirement.encode('utf-8')).hexdigest()
+    cache = _load_cache(LONG_TERM_POLICY_FILE)
+    cache.append({"hashkey": hashkey, "policy": policy})
+    
+    _save_cache(cache, LONG_TERM_POLICY_FILE)
+    print(f"✅ 长期策略已保存到缓存")
+
+
+def get_long_term_policy():
+    """从缓存获取长期策略"""
+    cache = _load_cache(LONG_TERM_POLICY_FILE)
+    return cache
+
+def search_long_term_policy(requirement):
+    """从缓存获取长期策略"""
+    hashkey = hashlib.md5(requirement.encode('utf-8')).hexdigest()
+    cache = _load_cache(LONG_TERM_POLICY_FILE)
+    for item in cache:
+        if item.get('hashkey') == hashkey:
+            return item.get('policy')
+    return None
 
 def save_qualified_candidate(candidate):
     """保存符合条件的候选人到缓存"""

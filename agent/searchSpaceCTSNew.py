@@ -7,7 +7,7 @@ from tool.logger import save_history_json
 from tool.contextAssemble import assemble_context,assemble_history
 from agent.prompt.system import SYSTEM_PROMPT
 from tool.searchCTS import search_with_payload_and_result
-from tool.matchCache import clear_cache,get_qualified_candidate
+from tool.matchCache import clear_cache,get_qualified_candidate,search_long_term_policy
 from tool.token_counter import add_tokens, get_total_tokens, reset_tokens
 from agent.prompt.evaluate import PROMPT_FOR_EVAlUATE
 
@@ -28,12 +28,14 @@ def searchAgent(requirement):# 初始化工作状态
         #执行前清除所有缓存
         clear_cache()
         reset_tokens()
+        policy_for_reference = search_long_term_policy(requirement)
 
         progress=0
         step = 1
         messages=[]
-        messages.append({ "role": "system", "content": SYSTEM_PROMPT}) 
+        messages.append({ "role": "system", "content": SYSTEM_PROMPT+ "\n 可以参考如下历史有效策略："+ policy_for_reference}) 
         messages.append({ "role": "user", "content": requirement}) 
+ 
 
         while step <= 3 and progress <= 1:
             # 组装当前轮次的上下文
@@ -65,7 +67,7 @@ def searchAgent(requirement):# 初始化工作状态
 
         
         # 循环结束后，组装包含所有轮次信息的最终上下文
-        final_context = assemble_context(SYSTEM_PROMPT, requirement, progress, history)
+        final_context = assemble_context(SYSTEM_PROMPT, policy_for_reference, requirement, progress, history)
         
         # 保存最终的完整上下文
         save_history_json(final_context)

@@ -8,7 +8,7 @@ prompt_for_action_compress="""
 请问playwright操作的内容进行压缩，只保留关键信息
 """
 
-def assemble_context(system_prompt, task_instruction,progress, history):
+def assemble_context(system_prompt, policy_for_reference, task_instruction,progress, history):
     """
     组装结构化的上下文信息
     
@@ -24,6 +24,9 @@ def assemble_context(system_prompt, task_instruction,progress, history):
     structured_context = (
         "[System Prompt]\n"
         f"{system_prompt}\n"
+        "\n---\n\n"
+        "[Reference]\n"
+        f"曾经有效的策略可供参考：{policy_for_reference}\n"
         "\n---\n\n"
         "[Task Instruction]\n"
         f"{task_instruction}\n"
